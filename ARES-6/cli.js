@@ -28,7 +28,7 @@ const isInBrowser = false;
 function makeBenchmarkRunner(sources, benchmarkConstructor, numIterations = 200) {
     let source = "'use strict';"
     for (let file of sources) {
-        source += readFile(file);
+        source += read(file);
     }
     source += `
         this.results = [];
@@ -40,10 +40,11 @@ function makeBenchmarkRunner(sources, benchmarkConstructor, numIterations = 200)
             var after = currentTime();
             results.push(after - before);
         }
+        results;
     `;
     return function doRun() {
-        let globalObjectOfScript = runString(source);
-        let results = globalObjectOfScript.results;
+        const context = Realm.create();
+        let results = Realm.eval(context, source);
         reportResult(results);
     }
 }
@@ -52,9 +53,9 @@ load("driver.js");
 load("results.js");
 load("stats.js");
 load("air_benchmark.js");
-load("basic_benchmark.js");
-load("babylon_benchmark.js");
-load("ml_benchmark.js");
+// load("basic_benchmark.js");
+// load("babylon_benchmark.js");
+// load("ml_benchmark.js");
 load("glue.js");
 
 driver.start(6);
